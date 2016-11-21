@@ -1,5 +1,7 @@
 package com.example.gsh.reminders;
 
+import android.database.Cursor;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -7,8 +9,10 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class RemindersActivity extends AppCompatActivity {
+public class RemindersActivity extends ActionBarActivity {
     ListView mListView;
+    private RemindersDbAdapter mRemindersDbAdapter;
+    private ReminderSimpleCusorAdapter mReminderSimpleCusorAdapter;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -31,10 +35,30 @@ public class RemindersActivity extends AppCompatActivity {
 
         mListView = (ListView)findViewById(R.id.reminders_list_view);
 
-        ArrayAdapter<String> mArrayAdapter = new ArrayAdapter<String>(this,R.layout.reminders_row,R.id.row_text,
-                                                                      new String[]{"first record","second record","third record"});
+       mListView.setDivider(null);
+        mRemindersDbAdapter=new RemindersDbAdapter(this);
+        mRemindersDbAdapter.open();
 
-        mListView.setAdapter(mArrayAdapter);
+        mRemindersDbAdapter.createReminder("frist record",true);
+        mRemindersDbAdapter.createReminder("second record",false);
+        mRemindersDbAdapter.createReminder("third record",false);
+
+        Cursor cursor=mRemindersDbAdapter.fetchAllReminder();
+
+        String[] from = new String[]{RemindersDbAdapter.COL_CONTENT};
+
+        int[] to = new int[]{R.id.row_text};
+
+        mReminderSimpleCusorAdapter=new ReminderSimpleCusorAdapter(
+                RemindersActivity.this,
+                R.layout.reminders_row,
+                cursor,
+                from,
+                to,
+                0
+        );
+
+        mListView.setAdapter(mReminderSimpleCusorAdapter);
 
 
 
